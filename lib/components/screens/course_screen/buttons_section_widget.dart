@@ -1,7 +1,8 @@
-import '../../../utils/app_colors.dart';
-import '../../../utils/app_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+
+import '../../../utils/app_colors.dart';
+import '../../../utils/app_styles.dart';
 
 class ButtonsSectionWidget extends StatelessWidget {
     final PanelController panelController;

@@ -1,6 +1,7 @@
-import 'package:design_code_app/screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+
+import '../screens/login_screen.dart';
 
 class AppWidget extends StatelessWidget {
     @override

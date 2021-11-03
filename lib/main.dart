@@ -1,4 +1,4 @@
-import 'package:design_code_app/app/app_widget.dart';
+import 'app/app_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
                                        

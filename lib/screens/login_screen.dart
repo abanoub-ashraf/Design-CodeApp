@@ -1,7 +1,7 @@
-import 'package:design_code_app/screens/home_screen.dart';
-import 'package:design_code_app/utils/app_assets.dart';
-import 'package:design_code_app/utils/app_colors.dart';
-import 'package:design_code_app/utils/app_styles.dart';
+import 'home_screen.dart';
+import '../utils/app_assets.dart';
+import '../utils/app_colors.dart';
+import '../utils/app_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,8 +17,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final _auth         = FirebaseAuth.instance;
     final _firestore    = FirebaseFirestore.instance;
 
-    Future<void> createNewUserData() {
-        return _firestore 
+    Future<void> createNewUserData() async {
+        await _firestore 
             .collection('users')
             .doc(_auth.currentUser?.uid)
             .set({
@@ -31,6 +31,75 @@ class _LoginScreenState extends State<LoginScreen> {
                 'certificates': [],
                 'profilePic': ''
             });
+    }
+
+    Future<void> signInOrCreateNewUser() async {
+        try {
+            await _auth.signInWithEmailAndPassword(email: email, password: password);
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => HomeScreen(),
+                ),
+            );
+        } on FirebaseAuthException catch (error) {
+            if (error.code == "user-not-found") {
+                signUpNewUser();
+            } else {
+                buildErrorDialog(error.message);
+            }
+        }
+    }
+
+    Future<void> signUpNewUser() async {
+        try {
+            await _auth
+                .createUserWithEmailAndPassword(email: email, password: password)
+                .then((user) {
+                    ///
+                    /// this line sends the user an email to ask for verification
+                    /// for this new account that's been created
+                    ///
+                    user.user?.sendEmailVerification();
+
+                    ///
+                    /// create a new user document in firestore
+                    ///
+                    createNewUserData();
+
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HomeScreen(),
+                        ),
+                    );
+                });
+        } catch (error) {
+            // ignore: avoid_print
+            buildErrorDialog(error.toString());
+        }
+    }
+
+    void buildErrorDialog(String? error) {
+        showDialog(
+            context: context, 
+            builder: (context) {
+                return AlertDialog(
+                    title: const Text('Error!'),
+                    content: Text(error ?? 'some error occurred'),
+                    actions: [
+                        // ignore: deprecated_member_use
+                        FlatButton(
+                            onPressed: () {
+                                Navigator.of(context).pop();
+                            }, 
+                            child: const Text('Ok',),
+                        )
+                    ],
+                );
+            },
+        );
     }
 
     Widget buildEmailTextField() {
@@ -175,63 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return Row(
             children: [
                 GestureDetector(
-                    onTap: () async {
-                        try {
-                            await _auth.signInWithEmailAndPassword(email: email, password: password);
-
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => HomeScreen(),
-                                ),
-                            );
-                        } on FirebaseAuthException catch (error) {
-                            if (error.code == "user-not-found") {
-                                try {
-                                    await _auth
-                                        .createUserWithEmailAndPassword(email: email, password: password)
-                                        .then((user) {
-                                            ///
-                                            /// this line sends the user an email to ask for verification
-                                            /// for this new account that's been created
-                                            ///
-                                            user.user?.sendEmailVerification();
-
-                                            ///
-                                            /// create a new user document in firestore
-                                            ///
-                                            createNewUserData();
-
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) => HomeScreen(),
-                                                ),
-                                            );
-                                        });
-                                } catch (error) {
-                                    // ignore: avoid_print
-                                    print(error);
-                                }
-                            } else {
-                                showDialog(context: context, builder: (context) {
-                                    return AlertDialog(
-                                        title: const Text('Error!'),
-                                        content: Text(error.message ?? 'some error occurred'),
-                                        actions: [
-                                            // ignore: deprecated_member_use
-                                            FlatButton(
-                                                onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                }, 
-                                                child: const Text('Ok',),
-                                            )
-                                        ],
-                                    );
-                                },);
-                            }
-                        }
-                    },
+                    onTap: signInOrCreateNewUser,
                     child: Container(
                         child: Text(
                             'Login',

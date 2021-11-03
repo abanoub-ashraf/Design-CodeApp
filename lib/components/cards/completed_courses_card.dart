@@ -1,8 +1,9 @@
+import 'package:flutter/material.dart';
+
 import '../../models/course_model.dart';
 import '../../utils/app_assets.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_styles.dart';
-import 'package:flutter/material.dart';
 
 class CompletedCoursesCard extends StatelessWidget {
     final CourseModel course;
