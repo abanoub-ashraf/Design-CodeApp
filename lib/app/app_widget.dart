@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
 
 class AppWidget extends StatelessWidget {
@@ -16,7 +18,9 @@ class AppWidget extends StatelessWidget {
                         // ),
                         // darkTheme: ThemeData.dark().copyWith(
                         // ),
-                        home: LoginScreen() 
+                        home: (FirebaseAuth.instance.currentUser == null) 
+                            ? LoginScreen() 
+                            : HomeScreen()
                     );
                 } else {
                     return MaterialApp(

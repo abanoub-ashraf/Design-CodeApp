@@ -1,3 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 import '../components/lists/badges_list.dart';
 import '../components/screens/profile_screen/completed_courses_section.dart';
 import '../components/screens/profile_screen/profile_certificates_viewer.dart';
@@ -5,10 +10,38 @@ import '../components/screens/profile_screen/profile_nav_bar_widget.dart';
 import '../components/screens/profile_screen/profile_picture_widget.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_styles.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
+    @override
+    State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+    String name         = "Loading...";
+    String bio          = "Loading...";
+    final _firestore    = FirebaseFirestore.instance;
+    final _auth         = FirebaseAuth.instance;
+
+    void loadUserData() {
+        _firestore
+            .collection('users')
+            .doc(_auth.currentUser?.uid)
+            .get()
+            .then((snapshot) {
+                setState(() {
+                    name = snapshot.data()?['name'] as String;
+                    bio  = snapshot.data()?['bio'] as String;
+                });
+            });
+    }
+
+    @override
+    void initState() {
+        super.initState();
+
+        loadUserData();
+    }
+
     @override
     Widget build(BuildContext context) {
         return Scaffold(
@@ -48,14 +81,14 @@ class ProfileScreen extends StatelessWidget {
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
                                                             Text(
-                                                                'Abanoub Ashraf',
+                                                                name,
                                                                 style: kTitle2Style,
                                                             ),
                                                             const SizedBox(
                                                                 height: 8,
                                                             ),
                                                             Text(
-                                                                'Flutter Developer',
+                                                                bio,
                                                                 style: kSecondaryCallOutLabelStyle,
                                                             ),
                                                         ],
